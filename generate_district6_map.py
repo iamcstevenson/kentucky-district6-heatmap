@@ -416,7 +416,7 @@ def generate_html(county_svg_data, district_svg_paths, get_color, min_sales, max
 
                 popup.innerHTML = `
                     <strong>${{countyName}} County</strong><br>
-                    Soybean Sales: $${{sales.toLocaleString()}}
+                    Soybean Sales: $` + sales.toLocaleString() + `
                 `;
                 popup.style.display = 'block';
             }});

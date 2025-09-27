@@ -828,7 +828,7 @@
 
                 popup.innerHTML = `
                     <strong>${countyName} County</strong><br>
-                    Soybean Sales: $${sales.toLocaleString()}
+                    Soybean Sales: $` + sales.toLocaleString() + `
                 `;
                 popup.style.display = 'block';
             });
