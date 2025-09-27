@@ -26,6 +26,31 @@
             font-weight: bold;
             color: #343a40;
             margin: 0 0 10px 0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .collapse-toggle {
+            font-size: 0.8em;
+            color: #6c757d;
+            user-select: none;
+            transition: transform 0.3s ease;
+        }
+
+        .collapse-toggle.collapsed {
+            transform: rotate(-90deg);
+        }
+
+        .collapsible-content {
+            transition: max-height 0.3s ease, opacity 0.3s ease;
+            overflow: hidden;
+        }
+
+        .collapsible-content.collapsed {
+            max-height: 0;
+            opacity: 0;
         }
 
         .map-description {
@@ -124,6 +149,20 @@
                 font-size: 1.2em;
             }
 
+            .collapsible-content {
+                max-height: 0;
+                opacity: 0;
+            }
+
+            .collapsible-content.expanded {
+                max-height: 500px;
+                opacity: 1;
+            }
+
+            .collapse-toggle {
+                display: inline;
+            }
+
             .legend {
                 padding: 10px 15px;
             }
@@ -134,13 +173,27 @@
                 gap: 5px;
             }
         }
+
+        @media (min-width: 769px) {
+            .collapsible-content {
+                max-height: none !important;
+                opacity: 1 !important;
+            }
+
+            .collapse-toggle {
+                display: none;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="map-container">
         <div class="map-header">
-            <h1 class="map-title">Kentucky 6th Congressional District - Agricultural Significance of Soybeans</h1>
-            <div style="font-size: 0.9em; color: #495057; line-height: 1.6; text-align: left;">
+            <h1 class="map-title" onclick="toggleContent()">
+                Kentucky 6th Congressional District - Agricultural Significance of Soybeans
+                <span class="collapse-toggle" id="toggleIcon">▼</span>
+            </h1>
+            <div class="collapsible-content" id="collapsibleContent" style="font-size: 0.9em; color: #495057; line-height: 1.6; text-align: left;">
                 <p style="margin: 0 0 12px 0;">
                     Soybeans are among Kentucky's most important crops, and they play a meaningful role in the agricultural economy of the 6th Congressional District. In 2022, farms in the district sold approximately $43.7 million worth of soybeans. Soybeans remain one of the most versatile and marketable crops for farmers in the 6th Congressional District.
                 </p>
@@ -815,6 +868,52 @@
     </div>
 
     <script>
+        // Collapsible content functionality
+        function toggleContent() {
+            const content = document.getElementById('collapsibleContent');
+            const icon = document.getElementById('toggleIcon');
+
+            // Only toggle on mobile devices
+            if (window.innerWidth <= 768) {
+                content.classList.toggle('expanded');
+                icon.classList.toggle('collapsed');
+
+                // Update icon
+                if (content.classList.contains('expanded')) {
+                    icon.textContent = '▲';
+                } else {
+                    icon.textContent = '▼';
+                }
+            }
+        }
+
+        // Ensure proper state on window resize
+        window.addEventListener('resize', function() {
+            const content = document.getElementById('collapsibleContent');
+            const icon = document.getElementById('toggleIcon');
+
+            if (window.innerWidth > 768) {
+                // Desktop: always show content, hide toggle
+                content.classList.remove('expanded', 'collapsed');
+                icon.classList.remove('collapsed');
+                icon.textContent = '▼';
+            } else {
+                // Mobile: start collapsed
+                if (!content.classList.contains('expanded')) {
+                    icon.textContent = '▼';
+                }
+            }
+        });
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.innerWidth <= 768) {
+                // Start collapsed on mobile
+                const content = document.getElementById('collapsibleContent');
+                content.classList.remove('expanded');
+            }
+        });
+
         // Popup functionality for district counties only
         const popup = document.getElementById('popup');
         const districtCounties = document.querySelectorAll('.county.district-county');
