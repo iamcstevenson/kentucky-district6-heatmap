@@ -11,7 +11,6 @@ def extract_tiger_data():
     # Create temp files
     counties_geojson = '/tmp/claude/ky_counties.geojson'
     district_geojson = '/tmp/claude/district6.geojson'
-    intersected_geojson = '/tmp/claude/counties_intersected.geojson'
 
     # Extract Kentucky counties
     cmd_counties = [
@@ -31,27 +30,15 @@ def extract_tiger_data():
     result1 = subprocess.run(cmd_counties, capture_output=True, text=True)
     if result1.returncode != 0:
         print(f"Error extracting counties: {result1.stderr}")
-        return None, None, None
+        return None, None
 
     print("Extracting District 6 boundary...")
     result2 = subprocess.run(cmd_district, capture_output=True, text=True)
     if result2.returncode != 0:
         print(f"Error extracting district: {result2.stderr}")
-        return None, None, None
+        return None, None
 
-    # Create intersection of counties with district boundary
-    print("Computing spatial intersection...")
-    cmd_intersect = [
-        'ogr2ogr', '-f', 'GeoJSON', intersected_geojson,
-        counties_geojson, '-clipsrc', district_geojson
-    ]
-
-    result3 = subprocess.run(cmd_intersect, capture_output=True, text=True)
-    if result3.returncode != 0:
-        print(f"Error computing intersection: {result3.stderr}")
-        return None, None, None
-
-    return counties_geojson, district_geojson, intersected_geojson
+    return counties_geojson, district_geojson
 
 def load_soybean_data():
     """Load and clean soybean sales data - prioritize district CSV for accuracy"""
@@ -97,8 +84,8 @@ def identify_district_counties(counties_geojson, district_geojson):
 
     return district_counties
 
-def convert_to_svg(counties_geojson, district_geojson, intersected_geojson, district_counties, sales_data):
-    """Convert GeoJSON to SVG paths with proper coordinate transformation and spatial intersection"""
+def convert_to_svg(counties_geojson, district_geojson, district_counties, sales_data):
+    """Convert GeoJSON to SVG paths with proper coordinate transformation"""
 
     # Kentucky bounding box
     bounds = {
@@ -113,8 +100,23 @@ def convert_to_svg(counties_geojson, district_geojson, intersected_geojson, dist
         y = ((bounds['max_lat'] - lat) / (bounds['max_lat'] - bounds['min_lat'])) * 500
         return round(x, 1), round(y, 1)
 
-    def coords_to_svg_path(coords_list):
-        """Convert coordinate list to SVG path string"""
+    # Process counties
+    with open(counties_geojson, 'r') as f:
+        counties_data = json.load(f)
+
+    county_svg_data = {}
+
+    for feature in counties_data['features']:
+        county_name = feature['properties']['NAMELSAD'].replace(' County', '')
+        fips = feature['properties']['GEOID']
+
+        # Get coordinates - handle both Polygon and MultiPolygon
+        if feature['geometry']['type'] == 'Polygon':
+            coords_list = [feature['geometry']['coordinates'][0]]
+        else:  # MultiPolygon
+            coords_list = [ring[0] for ring in feature['geometry']['coordinates']]
+
+        # Convert all coordinate rings to SVG paths
         svg_paths = []
         for coords in coords_list:
             path_parts = []
@@ -123,100 +125,14 @@ def convert_to_svg(counties_geojson, district_geojson, intersected_geojson, dist
                 path_parts.append(f"{'M' if i == 0 else 'L'} {x},{y}")
             path_parts.append("Z")
             svg_paths.append(" ".join(path_parts))
-        return " ".join(svg_paths)
-
-    # Process all counties (for non-district counties)
-    with open(counties_geojson, 'r') as f:
-        counties_data = json.load(f)
-
-    # Process intersected counties (for district portions)
-    with open(intersected_geojson, 'r') as f:
-        intersected_data = json.load(f)
-
-    county_svg_data = {}
-    intersected_counties = set()
-
-    # First, process intersected geometries (portions within district)
-    for feature in intersected_data['features']:
-        county_name = feature['properties']['NAMELSAD'].replace(' County', '')
-        fips = feature['properties']['GEOID']
-        intersected_counties.add(county_name)
-
-        # Get coordinates - handle both Polygon and MultiPolygon
-        if feature['geometry']['type'] == 'Polygon':
-            coords_list = [feature['geometry']['coordinates'][0]]
-        elif feature['geometry']['type'] == 'MultiPolygon':
-            coords_list = [ring[0] for ring in feature['geometry']['coordinates']]
-        else:
-            continue
-
-        svg_path = coords_to_svg_path(coords_list)
 
         county_svg_data[county_name] = {
             'name': county_name,
             'fips': fips,
-            'svg_path': svg_path,
-            'in_district': True,  # This is the intersected portion
-            'sales': sales_data.get(county_name, 0),
-            'is_partial': True
-        }
-
-    # Then, process full counties
-    for feature in counties_data['features']:
-        county_name = feature['properties']['NAMELSAD'].replace(' County', '')
-        fips = feature['properties']['GEOID']
-
-        # Skip if we already processed the intersected portion
-        if county_name in intersected_counties:
-            continue
-
-        # Get coordinates - handle both Polygon and MultiPolygon
-        if feature['geometry']['type'] == 'Polygon':
-            coords_list = [feature['geometry']['coordinates'][0]]
-        elif feature['geometry']['type'] == 'MultiPolygon':
-            coords_list = [ring[0] for ring in feature['geometry']['coordinates']]
-        else:
-            continue
-
-        svg_path = coords_to_svg_path(coords_list)
-
-        county_svg_data[county_name] = {
-            'name': county_name,
-            'fips': fips,
-            'svg_path': svg_path,
+            'svg_path': " ".join(svg_paths),
             'in_district': county_name in district_counties,
-            'sales': sales_data.get(county_name, 0),
-            'is_partial': False
+            'sales': sales_data.get(county_name, 0)
         }
-
-    # Add non-intersected portions of partial counties as separate entries
-    for feature in counties_data['features']:
-        county_name = feature['properties']['NAMELSAD'].replace(' County', '')
-
-        # Only for counties that have intersected portions and are in district
-        if county_name in intersected_counties and county_name in district_counties:
-            fips = feature['properties']['GEOID']
-
-            # Get full county coordinates
-            if feature['geometry']['type'] == 'Polygon':
-                coords_list = [feature['geometry']['coordinates'][0]]
-            elif feature['geometry']['type'] == 'MultiPolygon':
-                coords_list = [ring[0] for ring in feature['geometry']['coordinates']]
-            else:
-                continue
-
-            svg_path = coords_to_svg_path(coords_list)
-
-            # Add as a separate entry for the non-district portion
-            county_svg_data[f"{county_name}_outside"] = {
-                'name': county_name,
-                'fips': fips,
-                'svg_path': svg_path,
-                'in_district': False,  # This represents the outside portion
-                'sales': 0,  # No sales data for outside portion
-                'is_partial': True,
-                'is_outside_portion': True
-            }
 
     # Process District 6 boundary
     with open(district_geojson, 'r') as f:
@@ -227,13 +143,16 @@ def convert_to_svg(counties_geojson, district_geojson, intersected_geojson, dist
     for feature in district_data['features']:
         if feature['geometry']['type'] == 'Polygon':
             coords_list = [feature['geometry']['coordinates'][0]]
-        elif feature['geometry']['type'] == 'MultiPolygon':
+        else:  # MultiPolygon
             coords_list = [ring[0] for ring in feature['geometry']['coordinates']]
-        else:
-            continue
 
-        svg_path = coords_to_svg_path(coords_list)
-        district_svg_paths.append(svg_path)
+        for coords in coords_list:
+            path_parts = []
+            for i, coord in enumerate(coords):
+                x, y = transform_coord(coord[0], coord[1])
+                path_parts.append(f"{'M' if i == 0 else 'L'} {x},{y}")
+            path_parts.append("Z")
+            district_svg_paths.append(" ".join(path_parts))
 
     return county_svg_data, district_svg_paths
 
@@ -275,22 +194,21 @@ def generate_html(county_svg_data, district_svg_paths, get_color, min_sales, max
     for county_name, data in county_svg_data.items():
         if data['in_district']:
             color = get_color(data['sales'])
-            # Counties/portions in district - with hover effects, royal blue borders
+            # Counties in district - with hover effects, royal blue borders
             county_elements.append(f'''
         <path class="county district-county"
-              data-county="{data['name']}"
+              data-county="{county_name}"
               data-sales="{data['sales']}"
               d="{data['svg_path']}"
               fill="{color}"
               stroke="#4169E1"
               stroke-width="0.5"/>''')
         else:
-            # Counties/portions outside district - no hover, gray fill
-            fill_color = "#f5f5f5" if not data.get('is_outside_portion', False) else "#e5e5e5"
+            # Counties outside district - no hover, gray fill
             county_elements.append(f'''
         <path class="county non-district-county"
               d="{data['svg_path']}"
-              fill="{fill_color}"
+              fill="#f5f5f5"
               stroke="#ccc"
               stroke-width="0.3"/>''')
 
@@ -369,11 +287,6 @@ def generate_html(county_svg_data, district_svg_paths, get_color, min_sales, max
 
         .county.non-district-county {{
             pointer-events: none;
-        }}
-
-        /* Slightly different styling for outside portions of partial counties */
-        .county.non-district-county[fill="#e5e5e5"] {{
-            opacity: 0.8;
         }}
 
         .district-boundary {{
@@ -532,8 +445,8 @@ def main():
 
     # Phase 1: Extract TIGER data
     print("\nPhase 1: Extracting TIGER shapefile data...")
-    counties_geojson, district_geojson, intersected_geojson = extract_tiger_data()
-    if not counties_geojson or not district_geojson or not intersected_geojson:
+    counties_geojson, district_geojson = extract_tiger_data()
+    if not counties_geojson or not district_geojson:
         return
 
     # Phase 2: Load soybean data
@@ -547,7 +460,7 @@ def main():
     # Phase 4: Convert to SVG
     print("\nPhase 4: Converting to SVG format...")
     county_svg_data, district_svg_paths = convert_to_svg(
-        counties_geojson, district_geojson, intersected_geojson, district_counties, sales_data
+        counties_geojson, district_geojson, district_counties, sales_data
     )
 
     # Phase 5: Calculate color scale
