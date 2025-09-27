@@ -1,0 +1,26 @@
+# Temporary files
+/tmp/
+*.tmp
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Claude settings
+.claude/
+
+# TIGER shapefile temporary extracts
+*.geojson
+/census-data/extracted/
+
+# Large backup files
+*backup*
+*working*
+kentucky-working-heatmap.html
+kentucky-tiger-aligned-heatmap.html
+kentucky-styled-heatmap.html
