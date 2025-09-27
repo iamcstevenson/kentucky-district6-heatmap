@@ -388,17 +388,16 @@ def generate_html(county_svg_data, district_svg_paths, get_color, min_sales, max
         </div>
 
         <div class="legend">
-            <div class="legend-title">Soybean Sales (2022)</div>
+            <div class="legend-title">Soybean Sales (2022)*</div>
             <div class="legend-scale">
-                <span>Scale:</span>
                 <div class="legend-gradient"></div>
             </div>
             <div class="legend-labels">
                 <span>${min_sales:,}</span>
                 <span>${max_sales:,}</span>
             </div>
-            <div style="margin-top: 8px; color: #6c757d; font-size: 0.8em;">
-                Black solid line indicates 6th Congressional District boundary
+            <div style="margin-top: 8px; color: #6c757d; font-size: 0.75em; font-style: italic;">
+                *US Census of Agriculture
             </div>
         </div>
     </div>
