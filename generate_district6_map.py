@@ -364,15 +364,7 @@ def generate_html(county_svg_data, district_svg_paths, get_color, min_sales, max
 <body>
     <div class="map-container">
         <div class="map-header">
-            <h1 class="map-title">Kentucky 6th Congressional District</h1>
-            <p class="map-description">
-                Soybean sales heat map for 2022. Hover over counties within the district (outlined in black) to view detailed sales data.
-                Heat map colors range from white ($0) to dark green (highest sales).
-            </p>
-
-            <h2 style="font-size: 1.1em; margin-top: 20px; margin-bottom: 15px; color: #343a40; text-align: left; line-height: 1.5;">
-                Agricultural Significance of Soybeans in Kentucky's 6th District
-            </h2>
+            <h1 class="map-title">Kentucky 6th Congressional District - Agricultural Significance of Soybeans</h1>
             <div style="font-size: 0.9em; color: #495057; line-height: 1.6; text-align: left;">
                 <p style="margin: 0 0 12px 0;">
                     Soybeans are among Kentucky's most important crops, and they play a meaningful role in the agricultural economy of the 6th Congressional District. In 2022, farms in the district sold approximately $43.7 million worth of soybeans. Soybeans remain one of the most versatile and marketable crops for farmers in the 6th Congressional District.
@@ -424,7 +416,7 @@ def generate_html(county_svg_data, district_svg_paths, get_color, min_sales, max
 
                 popup.innerHTML = `
                     <strong>${{countyName}} County</strong><br>
-                    Soybean Sales: ${{sales.toLocaleString()}}
+                    Soybean Sales: $$${{sales.toLocaleString()}}
                 `;
                 popup.style.display = 'block';
             }});
