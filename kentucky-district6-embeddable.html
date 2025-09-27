@@ -103,7 +103,7 @@
         .legend-gradient {
             width: 150px;
             height: 15px;
-            background: linear-gradient(to right, #ffffff, hsl(120, 100%, 40%));
+            background: linear-gradient(to right, #ffffff, hsl(120, 60%, 80%), hsl(120, 75%, 60%), hsl(120, 90%, 40%), hsl(120, 90%, 15%));
             border: 1px solid #ccc;
         }
 
@@ -828,7 +828,7 @@
 
                 popup.innerHTML = `
                     <strong>${countyName} County</strong><br>
-                    Soybean Sales: ${sales.toLocaleString()}
+                    Soybean Sales: \${sales.toLocaleString()}
                 `;
                 popup.style.display = 'block';
             });

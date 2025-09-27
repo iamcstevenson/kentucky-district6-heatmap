@@ -328,7 +328,7 @@ def generate_html(county_svg_data, district_svg_paths, get_color, min_sales, max
         .legend-gradient {{
             width: 150px;
             height: 15px;
-            background: linear-gradient(to right, #ffffff, hsl(120, 100%, 40%));
+            background: linear-gradient(to right, #ffffff, hsl(120, 60%, 80%), hsl(120, 75%, 60%), hsl(120, 90%, 40%), hsl(120, 90%, 15%));
             border: 1px solid #ccc;
         }}
 
@@ -416,7 +416,7 @@ def generate_html(county_svg_data, district_svg_paths, get_color, min_sales, max
 
                 popup.innerHTML = `
                     <strong>${{countyName}} County</strong><br>
-                    Soybean Sales: ${{sales.toLocaleString()}}
+                    Soybean Sales: \\${{sales.toLocaleString()}}
                 `;
                 popup.style.display = 'block';
             }});
