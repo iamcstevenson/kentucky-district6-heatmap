@@ -14,13 +14,17 @@ Thumbs.db
 # Claude settings
 .claude/
 
-# TIGER shapefile temporary extracts
+# TIGER shapefile data (too large for GitHub)
 *.geojson
-/census-data/extracted/
+/census-data/
 
-# Large backup files
+# Development and backup files
 *backup*
 *working*
-kentucky-working-heatmap.html
-kentucky-tiger-aligned-heatmap.html
-kentucky-styled-heatmap.html
+*test*
+kentucky-counties-full.html
+kentucky-district6-heatmap.html
+ky-cd6-2022-soybean-embeddable.html
+generate_full_map.py
+working_heatmap*.py
+SVG*.txt
