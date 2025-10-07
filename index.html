@@ -240,6 +240,60 @@
       border-radius:8px;
     }
     .collapse-btn:focus{ outline:2px solid rgba(16,185,129,0.18) }
+    
+        /* ===== Mobile polish (<= 600px) ===== */
+    @media (max-width: 600px) {
+      /* Header stacks cleanly */
+      .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.6rem;
+        padding: 1rem 1rem 0.8rem;
+      }
+      .title-block { max-width: 100%; }
+      h1 { font-size: 1.28rem; line-height: 1.15; margin-right: 0; }
+      .subtitle { font-size: 0.98rem; color: #3f5b52; }
+
+      /* Stat pill spans full width and reads left-aligned */
+      .meta-area { align-items: stretch; gap: 0.4rem; width: 100%; }
+      .stat { align-self: stretch; text-align: left; padding: 0.55rem 0.75rem; }
+      #toggleDescription { padding-left: 0; }
+
+      /* Body spacing */
+      .card-body { grid-template-columns: 1fr; gap: 0.9rem; padding: 0.9rem; }
+
+      /* MAP: make it the star on mobile */
+      .map-panel { padding: 0.6rem; }
+      .map-top { align-items: flex-start; }
+      .map-frame { border-radius: 10px; }
+      .svg-container {
+        padding-bottom: 90%;               /* taller viewport for bigger map */
+      }
+      .svg-container svg {
+        width: 100%;
+        height: auto;
+        transform: scale(1.9) translateX(0%) translateY(0%); /* bigger + centered */
+        transform-origin: center;
+      }
+
+      /* Legend: label first, swatches wrap nicely */
+      .legend { flex-direction: column; align-items: flex-start; gap: 0.35rem; }
+      .legend .labels { order: 0; }
+      .legend .swatches { order: 1; flex-wrap: wrap; gap: 8px; }
+
+      /* Description panel: better readability & spacing */
+      .desc-panel { padding: 0.9rem; line-height: 1.6; }
+      .desc-panel p { margin-bottom: 0.8rem; }
+    }
+
+    /* ===== Small tablets (601–900px) ===== */
+    @media (min-width: 601px) and (max-width: 900px) {
+      .card-header { gap: 0.8rem; }
+      h1 { font-size: 1.4rem; }
+      .svg-container { padding-bottom: 70%; }
+      .svg-container svg { transform: scale(1.6) translateX(0%) translateY(0%); }
+    }
+
   </style>
 </head>
 <body>
