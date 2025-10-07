@@ -91,28 +91,24 @@
       position:relative; /* needed for absolute tooltip */
     }
 
+    /* RESPONSIVE, TRANSFORM-FREE SVG */
     .svg-container{
       width:100%;
       height:0;
-      padding-bottom:40%;   /* overall aspect */
+      padding-bottom:62%;     /* pick the frame aspect you like (55–70%) */
       position:relative;
-      display:flex;
-      justify-content:center;
-      align-items:center;
     }
     .svg-container svg{
       position:absolute;
       inset:0;
-      width:90%;
-      height:auto;
-      margin:auto;
-      transform:scale(1.5);   /* base “zoom” */
-      transform-origin:center;
+      width:100%;
+      height:100%;            /* fill container; browser handles centering */
+      display:block;
     }
 
     /* legend */
     .legend{display:flex;justify-content:space-between;align-items:center;gap:1rem;font-size:.9rem;color:var(--muted);}
-    .legend .swatches{display:flex;gap:6px;align-items:center;}
+    .legend .swatches{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
     .swatch{width:22px;height:12px;border-radius:3px;border:1px solid rgba(0,0,0,.06);}
     .legend .labels{font-size:.84rem;color:var(--muted);}
 
@@ -130,7 +126,7 @@
 
     /* tooltip (absolute inside .map-frame) */
     .map-tooltip{
-      position:absolute;              /* anchored to .map-frame */
+      position:absolute;
       pointer-events:none;
       background:linear-gradient(180deg,#064635,#0f766e);
       color:#fff;
@@ -145,8 +141,8 @@
     }
 
     /* interactions */
-    .county.district-county{transition:transform .06s ease,filter .12s;cursor:pointer;}
-    .county.district-county:hover{transform:translateY(-2px);filter:brightness(1.08);stroke:var(--accent-1);stroke-width:1.6;}
+    .county.district-county{transition:filter .12s ease;cursor:pointer;}
+    .county.district-county:hover{filter:brightness(1.08);stroke:var(--accent-1);stroke-width:1.6;}
 
     /* micro animations */
     @keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
@@ -167,11 +163,9 @@
     /* Keep taps smooth without blocking pinch zoom */
     .county.district-county { touch-action: manipulation; }
 
-    /* =========================================================
-       RESPONSIVE CONSOLIDATION: phone → tablet → desktop
-       ========================================================= */
+    /* ===== Simple responsive tiers (no SVG transforms needed) ===== */
 
-    /* --- Phone (≤600px) --- */
+    /* Phone */
     @media (max-width:600px){
       .card-header{flex-direction:column;align-items:flex-start;gap:.6rem;padding:1rem 1rem .8rem;}
       .title-block{max-width:100%;}
@@ -187,62 +181,26 @@
       .map-frame{border-radius:10px;}
 
       .svg-container{padding-bottom:92%;}
-      .svg-container svg{
-        width:100%;
-        height:auto;
-        /* your chosen phone centering/zoom */
-        transform:scale(3.0) translateX(-37%) translateY(-5%);
-        transform-origin:center;
-      }
-
-      .legend{flex-direction:column;align-items:flex-start;gap:.4rem;}
-      .legend .swatches{flex-wrap:wrap;gap:8px;}
-
-      .desc-panel{padding:.9rem;line-height:1.6;}
-      .desc-panel p{margin-bottom:.8rem;}
     }
 
-    /* --- Tablet (iPad mini/air/pro portrait & small landscape) 700–1180px --- */
+    /* Tablet (iPad family) */
     @media (min-width:700px) and (max-width:1180px){
       .card-body{grid-template-columns:1fr;gap:1.25rem;padding:1.4rem;}
-
       .card-header{flex-direction:column;align-items:flex-start;gap:.8rem;}
       .meta-area{width:100%;align-items:flex-start;}
-
       .svg-container{padding-bottom:64%;}
-      .svg-container svg{
-        width:100%;
-        height:auto;
-        transform:scale(1.65) translateX(0%) translateY(0%);
-        transform-origin:center;
-      }
-
-      .legend{flex-direction:row;justify-content:space-between;align-items:center;gap:1rem;}
+      .legend{justify-content:space-between;gap:1rem;}
       .desc-panel{padding:1rem 1.25rem;line-height:1.6;}
     }
 
-    /* --- Tablet (large iPad landscape) 1024–1180px fine-tune --- */
-    @media (min-width:1024px) and (max-width:1180px) and (orientation:landscape){
-      .svg-container{padding-bottom:58%;}
-      .svg-container svg{transform:scale(1.75) translateX(0%) translateY(-1%);}
-    }
-
-    /* --- Desktop / Large (≥1181px) --- */
+    /* Desktop */
     @media (min-width:1181px){
       .card-body{grid-template-columns:1fr 420px;align-items:start;gap:1.25rem;padding:1.25rem;}
       .title-block{max-width:65%;}
       .svg-container{padding-bottom:55%;}
-      .svg-container svg{
-        width:92%;
-        height:auto;
-        /* your chosen desktop centering/zoom */
-        transform:scale(2.5) translateX(-37%) translateY(-5%);
-        transform-origin:center;
-      }
-
-      /* Hide collapse toggle and force details shown on desktop */
-      .collapse-btn { display: none; }
-      #descPanel { display: block !important; }
+      /* Hide collapse on desktop */
+      .collapse-btn { display:none; }
+      #descPanel { display:block !important; }
     }
   </style>
 </head>
@@ -276,7 +234,7 @@
 
           <div class="map-frame">
             <div class="svg-container" id="svgHost">
-                           <svg class="map-svg" viewBox="0 0 800 400" preserveAspectRatio="xMidYMid meet">
+                                      <svg class="map-svg" viewBox="0 0 800 400" preserveAspectRatio="xMidYMid meet">
                 <!-- Counties -->
                 
         <path class="county district-county"
@@ -448,11 +406,10 @@
       // --- Tooltip wiring: position within .map-frame (pinch-zoom safe) ---
       const tooltip = document.getElementById('mapTooltip');
       const svgHost = document.getElementById('svgHost');
-      if (!tooltip || !svgHost) return;
 
-      function wireUpMap() {
-        const svg = svgHost.querySelector('svg');
-        if (!svg) return;
+      function wireTooltip(){
+        const svg = svgHost?.querySelector('svg');
+        if (!tooltip || !svg) return;
 
         // Ensure responsive centering
         svg.setAttribute('preserveAspectRatio','xMidYMid meet');
@@ -465,12 +422,8 @@
           const rect = frame.getBoundingClientRect();
           const cx = (evt.clientX ?? (evt.touches && evt.touches[0]?.clientX) ?? 0);
           const cy = (evt.clientY ?? (evt.touches && evt.touches[0]?.clientY) ?? 0);
-
-          const left = cx - rect.left;
-          const top  = cy - rect.top;
-
-          tooltip.style.left = left + 'px';
-          tooltip.style.top  = top  + 'px';
+          tooltip.style.left = (cx - rect.left) + 'px';
+          tooltip.style.top  = (cy - rect.top)  + 'px';
         }
 
         counties.forEach(c => {
@@ -480,50 +433,83 @@
             const county = c.dataset.county || 'Unknown';
             const sales = Number(c.dataset.sales || 0);
             const salesLabel = sales ? ('$' + sales.toLocaleString()) : 'No data';
-            tooltip.innerHTML = `
-              <strong style="display:block;font-size:1rem;">${county}</strong>
-              <span style="font-size:0.85rem;opacity:0.95;">Soybean sales: ${salesLabel}</span>
-            `;
+            tooltip.innerHTML =
+              `<strong style="display:block;font-size:1rem;">${county}</strong>
+               <span style="font-size:0.85rem;opacity:0.95;">Soybean sales: ${salesLabel}</span>`;
             tooltip.style.display = 'block';
             tooltip.setAttribute('aria-hidden','false');
             placeTooltip(e);
           }
 
           function move(e){ placeTooltip(e); }
-
           function hide(){
             if (pinned === c) return;
             tooltip.style.display = 'none';
             tooltip.setAttribute('aria-hidden','true');
           }
 
-          // Pointer events cover mouse + touch
-          c.addEventListener('pointerenter', show, { passive: true });
-          c.addEventListener('pointermove',  move, { passive: true });
-          c.addEventListener('pointerleave', hide, { passive: true });
+          c.addEventListener('pointerenter', show, { passive:true });
+          c.addEventListener('pointermove',  move, { passive:true });
+          c.addEventListener('pointerleave', hide, { passive:true });
 
-          // Click to pin/unpin
           c.addEventListener('click', (e) => {
             if (pinned === c) { pinned = null; hide(); }
             else { pinned = c; show(e); }
           });
 
-          // Keyboard accessibility
           c.addEventListener('focus', show);
           c.addEventListener('blur', hide);
           c.addEventListener('keydown', (e)=>{
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              c.click();
-            }
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); c.click(); }
           });
         });
       }
 
-      const obs = new MutationObserver(wireUpMap);
-      obs.observe(svgHost, { childList: true, subtree: true });
-      window.addEventListener('load', wireUpMap);
-      document.addEventListener('DOMContentLoaded', wireUpMap);
+      // --- Auto-fit the SVG viewBox to district geometry (robust centering) ---
+      function fitDistrict(pad = 14) {
+        const svg = svgHost?.querySelector('svg');
+        if (!svg) return;
+
+        svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+
+        // Look for district county groups/paths
+        const nodes = svg.querySelectorAll('.district-county, .county.district-county, path.district-county');
+        if (!nodes.length) return;
+
+        let minX =  Infinity, minY =  Infinity;
+        let maxX = -Infinity, maxY = -Infinity;
+
+        nodes.forEach(node => {
+          const b = node.getBBox?.();
+          if (!b || !isFinite(b.x) || !isFinite(b.y) || !isFinite(b.width) || !isFinite(b.height)) return;
+          minX = Math.min(minX, b.x);
+          minY = Math.min(minY, b.y);
+          maxX = Math.max(maxX, b.x + b.width);
+          maxY = Math.max(maxY, b.y + b.height);
+        });
+
+        if (minX === Infinity) return;
+
+        const vbX = minX - pad;
+        const vbY = minY - pad;
+        const vbW = (maxX - minX) + pad * 2;
+        const vbH = (maxY - minY) + pad * 2;
+
+        svg.setAttribute('viewBox', `${vbX} ${vbY} ${vbW} ${vbH}`);
+      }
+
+      function initAll(){
+        fitDistrict(14);  // center & “zoom” to district with padding
+        wireTooltip();    // then wire tooltip
+      }
+
+      // Observe SVG insertion / changes
+      const obs = new MutationObserver(initAll);
+      if (svgHost) obs.observe(svgHost, { childList:true, subtree:true });
+
+      window.addEventListener('load', initAll);
+      window.addEventListener('resize', () => fitDistrict(14));
+      window.addEventListener('orientationchange', () => fitDistrict(14));
     })();
   </script>
 </body>
