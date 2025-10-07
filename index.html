@@ -8,293 +8,264 @@
   <!-- Inter font -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 
-  <style>
-    :root{
-      --bg:#f3f7f4;
-      --card:#ffffff;
-      --muted:#57706a;
-      --accent-1: #0f766e;    /* deep green */
-      --accent-2: #16a34a;    /* bright green */
-      --accent-3: #e6f8ef;    /* pale green background */
-      --soft-border: rgba(6,95,70,0.08);
-      --glass: rgba(255,255,255,0.6);
-      --radius: 12px;
-    }
-
-    html,body{height:100%; margin:0; background:var(--bg); font-family:"Inter",system-ui,Arial,sans-serif; color:#0f1720;}
-    .page-wrap{min-height:100vh; display:flex; align-items:center; justify-content:center; padding:2rem;}
-    .card{
-      width:100%;
-      max-width:1100px;
-      background:var(--card);
-      border-radius:var(--radius);
-      box-shadow: 0 8px 30px rgba(10, 20, 18, 0.06);
-      overflow:hidden;
-      display:grid;
-      grid-template-columns: 1fr;
-      gap:0;
-      border:1px solid var(--soft-border);
-      animation: fadeUp .45s ease both;
-    }
-
-    /* header / title */
-    .card-header{
-      padding:1.25rem 1.5rem;
-      background: linear-gradient(90deg, rgba(230,248,235,1), rgba(245,249,247,1));
-      display:flex;
-      gap:1rem;
-      align-items: flex-start;
-      justify-content: space-between;
-      border-bottom:1px solid #e8f0ec;
-    }
-    .title-block{max-width:70%;}
-    h1{
-      margin:0;
-      font-size:1.25rem;
-      line-height:1.1;
-      color:#063f33;
-      font-weight:700;
-    }
-    .subtitle{
-      margin-top:6px;
-      color:var(--muted);
-      font-size:0.95rem;
-      line-height:1.5;
-    }
-
-    .meta-area{
-      display:flex;
-      flex-direction:column;
-      gap:0.5rem;
-      align-items:flex-end;
-    }
-    .stat {
-      background: linear-gradient(180deg, rgba(16,185,129,0.06), rgba(16,185,129,0.02));
-      color: #065f46;
-      padding:0.6rem 0.9rem;
-      border-radius:10px;
-      font-weight:600;
-      font-size:0.95rem;
-      text-align:right;
-      min-width:160px;
-      border:1px solid rgba(6,95,70,0.08);
-    }
-    .stat small{display:block; font-weight:400; color:var(--muted); font-size:0.78rem;}
-
-    /* main content grid (map + text) */
-    .card-body{
-      display:grid;
-      grid-template-columns: 1fr;
-      gap:1rem;
-      padding:1.25rem;
-    }
-
-    /* map and legend area */
-    .map-panel{
-      background: linear-gradient(180deg, #fff, #fbfff9);
-      border-radius:10px;
-      padding:0.8rem;
-      border:1px solid #edf7ef;
-      display:flex;
-      flex-direction:column;
-      gap:0.75rem;
-      align-items:stretch;
-    }
-    .map-top{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:1rem;
-    }
-    .map-top .map-label{
-      font-weight:600;
-      color:#064635;
-    }
-    .map-frame{
-      width:100%;
-      border-radius:8px;
-      overflow:hidden;
-      background:#fff;
-      box-shadow:0 2px 10px rgba(6,95,70,0.03);
-      border:1px solid #e9f5ef;
-      position:relative;
-    }
-    .svg-container {
-      width: 100%;
-      height: 0;
-      padding-bottom: 40%; /* reduces vertical space = zooms in visually */
-      position: relative;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .svg-container svg {
-      position: absolute;
-      inset: 0;
-      width: 90%;      /* increase size */
-      height: auto;
-      margin: auto;
-      transform: scale(1.5); /* zoom in */
-      transform-origin: center;
-    }
-
-    .svg-container svg {
-      transform: scale(1.4); /* try between 1.2 – 1.8 */
-    }
-
-
-    /* legend */
-    .legend{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:1rem;
-      font-size:0.9rem;
-      color:var(--muted);
-    }
-    .legend .swatches{
-      display:flex;
-      gap:6px;
-      align-items:center;
-    }
-    .swatch{ width:22px; height:12px; border-radius:3px; border:1px solid rgba(0,0,0,0.06); }
-    .legend .labels{ font-size:0.84rem; color:var(--muted); }
-
-    /* right-side / description area */
-    .desc-panel{
-      background:linear-gradient(180deg, rgba(247,251,249,1), rgba(255,255,255,1));
-      padding:0.9rem;
-      border-radius:10px;
-      border:1px solid #eef6ef;
-      color:var(--muted);
-      line-height:1.55;
-    }
-    .desc-panel p{ margin:0 0 0.9rem 0; }
-    .desc-panel .muted-note{ font-size:0.9rem; color: #3f5b52; }
-
-    /* tooltip */
-    .map-tooltip{
-      position:fixed;
-      pointer-events:none;
-      background:linear-gradient(180deg,#064635,#0f766e);
-      color:white;
-      padding:8px 10px;
-      font-size:13px;
-      border-radius:6px;
-      box-shadow:0 6px 18px rgba(3,30,20,0.25);
-      transform:translate(-50%,-120%);
-      white-space:nowrap;
-      z-index:9999;
-      display:none;
-    }
-
-    /* interactions */
-    .county.district-county{ transition: transform .06s ease, filter .12s; cursor:pointer; }
-    .county.district-county:hover{ transform:translateY(-2px); filter:brightness(1.08); stroke:var(--accent-1); stroke-width:1.6; }
-
-    /* small screen layout (stack) */
-    @media (min-width:900px){
-      .card-body{ grid-template-columns: 1fr 420px; align-items:start; gap:1.25rem; }
-      .title-block{max-width:65%;}
-    }
-    @media (min-width: 900px) {
-      .map-frame {max-width: 100%;
+<style>
+  :root{
+    --bg:#f3f7f4;
+    --card:#ffffff;
+    --muted:#57706a;
+    --accent-1:#0f766e;     /* deep green */
+    --accent-2:#16a34a;     /* bright green */
+    --accent-3:#e6f8ef;     /* pale green background */
+    --soft-border:rgba(6,95,70,0.08);
+    --glass:rgba(255,255,255,0.6);
+    --radius:12px;
   }
-      .svg-container svg {
-      position: absolute;
-      inset: 0;
-      width: 90%;
-      height: auto;
-      margin: auto;
-      transform: scale(2.0) translateX(-37%) translateY(-5%);
-      transform-origin: center;
-    }
-    @media (max-width: 768px) {
-    .svg-container svg {
-    transform: scale(1.2) translateX(0%) translateY(0%);
+
+  html,body{height:100%;margin:0;background:var(--bg);font-family:"Inter",system-ui,Arial,sans-serif;color:#0f1720;}
+  .page-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem;}
+  .card{
+    width:100%;
+    max-width:1100px;
+    background:var(--card);
+    border-radius:var(--radius);
+    box-shadow:0 8px 30px rgba(10,20,18,.06);
+    overflow:hidden;
+    display:grid;
+    grid-template-columns:1fr;
+    gap:0;
+    border:1px solid var(--soft-border);
+    animation:fadeUp .45s ease both;
   }
+
+  /* header / title */
+  .card-header{
+    padding:1.25rem 1.5rem;
+    background:linear-gradient(90deg,rgba(230,248,235,1),rgba(245,249,247,1));
+    display:flex;
+    gap:1rem;
+    align-items:flex-start;
+    justify-content:space-between;
+    border-bottom:1px solid #e8f0ec;
+  }
+  .title-block{max-width:70%;}
+  h1{margin:0;font-size:1.25rem;line-height:1.1;color:#063f33;font-weight:700;}
+  .subtitle{margin-top:6px;color:var(--muted);font-size:.95rem;line-height:1.5;}
+
+  .meta-area{display:flex;flex-direction:column;gap:.5rem;align-items:flex-end;}
+  .stat{
+    background:linear-gradient(180deg,rgba(16,185,129,.06),rgba(16,185,129,.02));
+    color:#065f46;
+    padding:.6rem .9rem;
+    border-radius:10px;
+    font-weight:600;
+    font-size:.95rem;
+    text-align:right;
+    min-width:160px;
+    border:1px solid rgba(6,95,70,.08);
+  }
+  .stat small{display:block;font-weight:400;color:var(--muted);font-size:.78rem;}
+
+  /* main content grid (map + text) */
+  .card-body{display:grid;grid-template-columns:1fr;gap:1rem;padding:1.25rem;}
+
+  /* map and legend area */
+  .map-panel{
+    background:linear-gradient(180deg,#fff,#fbfff9);
+    border-radius:10px;
+    padding:.8rem;
+    border:1px solid #edf7ef;
+    display:flex;
+    flex-direction:column;
+    gap:.75rem;
+    align-items:stretch;
+  }
+  .map-top{display:flex;justify-content:space-between;align-items:center;gap:1rem;}
+  .map-top .map-label{font-weight:600;color:#064635;}
+  .map-frame{
+    width:100%;
+    border-radius:8px;
+    overflow:hidden;
+    background:#fff;
+    box-shadow:0 2px 10px rgba(6,95,70,.03);
+    border:1px solid #e9f5ef;
+    position:relative;
+  }
+
+  .svg-container{
+    width:100%;
+    height:0;
+    padding-bottom:40%;   /* overall aspect */
+    position:relative;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+  }
+  .svg-container svg{
+    position:absolute;
+    inset:0;
+    width:90%;
+    height:auto;
+    margin:auto;
+    transform:scale(1.5);   /* base “zoom” */
+    transform-origin:center;
+  }
+
+  /* legend */
+  .legend{display:flex;justify-content:space-between;align-items:center;gap:1rem;font-size:.9rem;color:var(--muted);}
+  .legend .swatches{display:flex;gap:6px;align-items:center;}
+  .swatch{width:22px;height:12px;border-radius:3px;border:1px solid rgba(0,0,0,.06);}
+  .legend .labels{font-size:.84rem;color:var(--muted);}
+
+  /* right-side / description area */
+  .desc-panel{
+    background:linear-gradient(180deg,rgba(247,251,249,1),rgba(255,255,255,1));
+    padding:.9rem;
+    border-radius:10px;
+    border:1px solid #eef6ef;
+    color:var(--muted);
+    line-height:1.55;
+  }
+  .desc-panel p{margin:0 0 .9rem 0;}
+  .desc-panel .muted-note{font-size:.9rem;color:#3f5b52;}
+
+  /* tooltip */
+  .map-tooltip{
+    position:fixed;
+    pointer-events:none;
+    background:linear-gradient(180deg,#064635,#0f766e);
+    color:#fff;
+    padding:8px 10px;
+    font-size:13px;
+    border-radius:6px;
+    box-shadow:0 6px 18px rgba(3,30,20,.25);
+    transform:translate(-50%,-120%);
+    white-space:nowrap;
+    z-index:9999;
+    display:none;
+  }
+
+  /* interactions */
+  .county.district-county{transition:transform .06s ease,filter .12s;cursor:pointer;}
+  .county.district-county:hover{transform:translateY(-2px);filter:brightness(1.08);stroke:var(--accent-1);stroke-width:1.6;}
+
+  /* micro animations */
+  @keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+  /* small utility */
+  .muted{color:var(--muted);font-size:.92rem;}
+  .small{font-size:.86rem;color:var(--muted);}
+
+  /* collapse button */
+  .collapse-btn{background:transparent;border:0;color:var(--accent-1);font-weight:600;cursor:pointer;font-size:.88rem;padding:6px 8px;border-radius:8px;}
+  .collapse-btn:focus{outline:2px solid rgba(16,185,129,.18);}
+
+  /* =========================================================
+     RESPONSIVE CONSOLIDATION: phone → tablet → desktop
+     ========================================================= */
+
+  /* --- Phone (≤600px) --- */
+  @media (max-width:600px){
+    .card-header{flex-direction:column;align-items:flex-start;gap:.6rem;padding:1rem 1rem .8rem;}
+    .title-block{max-width:100%;}
+    h1{font-size:1.28rem;line-height:1.15;}
+    .subtitle{font-size:.98rem;}
+
+    .meta-area{width:100%;align-items:stretch;gap:.4rem;}
+    .stat{text-align:left;padding:.55rem .75rem;}
+
+    .card-body{grid-template-columns:1fr;gap:.9rem;padding:.9rem;}
+
+    .map-panel{padding:.6rem;}
+    .map-frame{border-radius:10px;}
+
+    .svg-container{padding-bottom:92%;}
+    .svg-container svg{
+      width:100%;
+      height:auto;
+      /* keep your chosen phone centering/zoom, tweak as needed */
+      transform:scale(3.0) translateX(-37%) translateY(-5%);
+      transform-origin:center;
+    }
+
+    .legend{flex-direction:column;align-items:flex-start;gap:.4rem;}
+    .legend .swatches{flex-wrap:wrap;gap:8px;}
+
+    .desc-panel{padding:.9rem;line-height:1.6;}
+    .desc-panel p{margin-bottom:.8rem;}
+  }
+
+  /* --- Tablet (iPad mini/air/pro portrait & small landscape) 700–1180px --- */
+  @media (min-width:700px) and (max-width:1180px){
+    .card-body{grid-template-columns:1fr;gap:1.25rem;padding:1.4rem;}
+
+    .card-header{flex-direction:column;align-items:flex-start;gap:.8rem;}
+    .meta-area{width:100%;align-items:flex-start;}
+
+    .svg-container{padding-bottom:64%;}
+    .svg-container svg{
+      width:100%;
+      height:auto;
+      transform:scale(1.65) translateX(0%) translateY(0%);
+      transform-origin:center;
+    }
+
+    .legend{flex-direction:row;justify-content:space-between;align-items:center;gap:1rem;}
+    .desc-panel{padding:1rem 1.25rem;line-height:1.6;}
+  }
+
+  /* --- Tablet (large iPad landscape) 1024–1180px fine-tune --- */
+  @media (min-width:1024px) and (max-width:1180px) and (orientation:landscape){
+    .svg-container{padding-bottom:58%;}
+    .svg-container svg{transform:scale(1.75) translateX(0%) translateY(-1%);}
+  }
+
+  /* --- Desktop / Large (≥1181px) --- */
+  @media (min-width:1181px){
+    .card-body{grid-template-columns:1fr 420px;align-items:start;gap:1.25rem;padding:1.25rem;}
+    .title-block{max-width:65%;}
+    .svg-container{padding-bottom:55%;}
+    .svg-container svg{
+      width:92%;
+      height:auto;
+      /* keep your chosen desktop centering/zoom from earlier */
+      transform:scale(2.0) translateX(-37%) translateY(-5%);
+      transform-origin:center;
+    }
+  }
+  /* Hide the collapse button on desktop & always show details there */
+@media (min-width: 1181px) {
+  .collapse-btn { display: none; }
+  #descPanel { display: block !important; }
 }
 
+/* Place tooltip relative to the map frame (not viewport) */
+.map-tooltip{
+  position: absolute;              /* was fixed */
+  pointer-events: none;
+  background: linear-gradient(180deg,#064635,#0f766e);
+  color: #fff;
+  padding: 8px 10px;
+  font-size: 13px;
+  border-radius: 6px;
+  box-shadow: 0 6px 18px rgba(3,30,20,.25);
+  transform: translate(-50%, -120%);
+  white-space: nowrap;
+  z-index: 5;                      /* within .map-frame stacking */
+  display: none;
 }
 
-    /* micro animations */
-    @keyframes fadeUp {
-      from{ opacity:0; transform:translateY(8px) ; }
-      to{ opacity:1; transform:translateY(0); }
-    }
+/* Remove iOS tap highlight / focus rectangle on SVG */
+svg, .county.district-county {
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+}
 
-    /* small utility */
-    .muted { color:var(--muted); font-size:0.92rem; }
-    .small { font-size:0.86rem; color:var(--muted); }
+/* Keep taps smooth without blocking pinch zoom */
+.county.district-county {
+  touch-action: manipulation;
+}
 
-    /* collapse button */
-    .collapse-btn{
-      background:transparent;
-      border:0;
-      color:var(--accent-1);
-      font-weight:600;
-      cursor:pointer;
-      font-size:0.88rem;
-      padding:6px 8px;
-      border-radius:8px;
-    }
-    .collapse-btn:focus{ outline:2px solid rgba(16,185,129,0.18) }
-    
-        /* ===== Mobile polish (<= 600px) ===== */
-    @media (max-width: 600px) {
-      /* Header stacks cleanly */
-      .card-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.6rem;
-        padding: 1rem 1rem 0.8rem;
-      }
-      .title-block { max-width: 100%; }
-      h1 { font-size: 1.28rem; line-height: 1.15; margin-right: 0; }
-      .subtitle { font-size: 0.98rem; color: #3f5b52; }
-
-      /* Stat pill spans full width and reads left-aligned */
-      .meta-area { align-items: stretch; gap: 0.4rem; width: 100%; }
-      .stat { align-self: stretch; text-align: left; padding: 0.55rem 0.75rem; }
-      #toggleDescription { padding-left: 0; }
-
-      /* Body spacing */
-      .card-body { grid-template-columns: 1fr; gap: 0.9rem; padding: 0.9rem; }
-
-      /* MAP: make it the star on mobile */
-      .map-panel { padding: 0.6rem; }
-      .map-top { align-items: flex-start; }
-      .map-frame { border-radius: 10px; }
-      .svg-container {
-        padding-bottom: 90%;               /* taller viewport for bigger map */
-      }
-      .svg-container svg {
-        width: 100%;
-        height: auto;
-        transform: scale(3.0) translateX(-37%) translateY(-5%); /* bigger + centered */
-        transform-origin: center;
-      }
-
-      /* Legend: label first, swatches wrap nicely */
-      .legend { flex-direction: column; align-items: flex-start; gap: 0.35rem; }
-      .legend .labels { order: 0; }
-      .legend .swatches { order: 1; flex-wrap: wrap; gap: 8px; }
-
-      /* Description panel: better readability & spacing */
-      .desc-panel { padding: 0.9rem; line-height: 1.6; }
-      .desc-panel p { margin-bottom: 0.8rem; }
-    }
-
-    /* ===== Small tablets (601–900px) ===== */
-    @media (min-width: 601px) and (max-width: 900px) {
-      .card-header { gap: 0.8rem; }
-      h1 { font-size: 1.4rem; }
-      .svg-container { padding-bottom: 70%; }
-      .svg-container svg { transform: scale(1.6) translateX(0%) translateY(0%); }
-    }
-
-  </style>
+</style>
 </head>
 <body>
   <div class="page-wrap">
