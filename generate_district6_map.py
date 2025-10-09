@@ -188,7 +188,7 @@ def calculate_color_scale(district_counties, sales_data):
 def generate_html(county_svg_data, district_svg_paths, get_color, min_sales, max_sales):
     """Generate the embeddable HTML map"""
 
-    # Create county SVG elements
+    # Create county SVG elements - ONLY district counties
     county_elements = []
 
     for county_name, data in county_svg_data.items():
@@ -203,14 +203,7 @@ def generate_html(county_svg_data, district_svg_paths, get_color, min_sales, max
               fill="{color}"
               stroke="#4169E1"
               stroke-width="0.5"/>''')
-        else:
-            # Counties outside district - no hover, gray fill
-            county_elements.append(f'''
-        <path class="county non-district-county"
-              d="{data['svg_path']}"
-              fill="#f5f5f5"
-              stroke="#ccc"
-              stroke-width="0.3"/>''')
+        # Non-district counties are NOT rendered
 
     # Create district boundary elements
     district_elements = []
@@ -308,10 +301,6 @@ def generate_html(county_svg_data, district_svg_paths, get_color, min_sales, max
         .county.district-county:hover {{
             stroke: #1e40af;
             stroke-width: 1.5;
-        }}
-
-        .county.non-district-county {{
-            pointer-events: none;
         }}
 
         .district-boundary {{
@@ -535,17 +524,50 @@ def generate_html(county_svg_data, district_svg_paths, get_color, min_sales, max
 
     return html_content
 
+def load_existing_county_data(sales_data, district_counties):
+    """Load pre-processed county SVG data from ky_counties.json"""
+    print("Using existing ky_counties.json data...")
+
+    with open('ky_counties.json', 'r') as f:
+        existing_data = json.load(f)
+
+    county_svg_data = {}
+    for county_name, data in existing_data.items():
+        county_svg_data[county_name] = {
+            'name': county_name,
+            'fips': data['fips'],
+            'svg_path': data['svg_path'],
+            'in_district': county_name in district_counties,
+            'sales': sales_data.get(county_name, 0)
+        }
+
+    # Empty district boundary paths since we're not extracting from TIGER
+    district_svg_paths = []
+
+    return county_svg_data, district_svg_paths
+
 def main():
     # Create temp directory
     os.makedirs('/tmp/claude', exist_ok=True)
 
     print("=== Kentucky 6th Congressional District Heat Map Generator ===")
 
-    # Phase 1: Extract TIGER data
-    print("\nPhase 1: Extracting TIGER shapefile data...")
-    counties_geojson, district_geojson = extract_tiger_data()
-    if not counties_geojson or not district_geojson:
-        return
+    # Phase 1: Check for TIGER data or use existing processed data
+    print("\nPhase 1: Checking for data sources...")
+
+    # Check if TIGER shapefiles exist
+    tiger_counties = 'census-data/tl_2024_us_county/tl_2024_us_county.shp'
+    tiger_district = 'census-data/tl_2024_21_cd119/tl_2024_21_cd119.shp'
+
+    use_existing = False
+    if not (os.path.exists(tiger_counties) and os.path.exists(tiger_district)):
+        if os.path.exists('ky_counties.json'):
+            print("TIGER shapefiles not found. Using existing ky_counties.json...")
+            use_existing = True
+        else:
+            print("Error: Neither TIGER shapefiles nor ky_counties.json found!")
+            print("Please download TIGER shapefiles or ensure ky_counties.json exists.")
+            return
 
     # Phase 2: Load soybean data
     print("\nPhase 2: Loading soybean sales data...")
@@ -553,13 +575,35 @@ def main():
 
     # Phase 3: Identify district counties
     print("\nPhase 3: Identifying District 6 counties...")
-    district_counties = identify_district_counties(counties_geojson, district_geojson)
 
-    # Phase 4: Convert to SVG
-    print("\nPhase 4: Converting to SVG format...")
-    county_svg_data, district_svg_paths = convert_to_svg(
-        counties_geojson, district_geojson, district_counties, sales_data
-    )
+    if use_existing:
+        # Load district counties from CSV
+        district_counties = set()
+        with open('district6-soybean-sales.csv', 'r') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                county = row['County'].strip()
+                district_counties.add(county)
+
+        print(f"District 6 contains {len(district_counties)} counties")
+
+        # Phase 4: Load existing SVG data
+        print("\nPhase 4: Loading existing SVG data...")
+        county_svg_data, district_svg_paths = load_existing_county_data(sales_data, district_counties)
+    else:
+        # Extract from TIGER shapefiles
+        print("Extracting TIGER shapefile data...")
+        counties_geojson, district_geojson = extract_tiger_data()
+        if not counties_geojson or not district_geojson:
+            return
+
+        district_counties = identify_district_counties(counties_geojson, district_geojson)
+
+        # Phase 4: Convert to SVG
+        print("\nPhase 4: Converting to SVG format...")
+        county_svg_data, district_svg_paths = convert_to_svg(
+            counties_geojson, district_geojson, district_counties, sales_data
+        )
 
     # Phase 5: Calculate color scale
     print("\nPhase 5: Calculating heat map colors...")

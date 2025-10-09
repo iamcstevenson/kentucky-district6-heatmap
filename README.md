@@ -8,26 +8,28 @@ Interactive, embeddable heat map visualization showing 2022 soybean sales data f
 
 ## 📋 Overview
 
-This project creates an interactive SVG-based heat map that visualizes soybean sales across the 16 counties (14 full, 2 partial) within Kentucky's 6th Congressional District. The map features precise geographic boundaries from US Census TIGER shapefiles and responsive design optimized for both desktop and mobile viewing.
+This project creates an interactive SVG-based heat map that visualizes soybean sales across the 16 counties within Kentucky's 6th Congressional District. The map features a modern, professional design with precise geographic boundaries from US Census TIGER shapefiles and responsive design optimized for desktop, tablet, and mobile viewing with advanced pinch-zoom support.
 
 ## ✨ Features
 
 ### 🗺️ **Geographic Accuracy**
+- **District-Only Visualization**: Shows only the 16 counties within the 6th Congressional District
 - **Official US Census TIGER Shapefiles**: Uses 2024 congressional district and county boundary data
-- **Precise District Boundaries**: Black solid perimeter line showing exact 6th District limits
-- **All 120 Kentucky Counties**: Complete state coverage with district-specific highlighting
+- **Precise County Boundaries**: Royal blue borders (#4169E1) for clear county delineation
 
-### 🎨 **Interactive Visualization**
-- **Heat Map Coloring**: White ($0) to dark green ($10.5M) gradient based on sales volume
-- **Selective Interaction**: Mouse hover effects only for counties within the district
-- **Royal Blue County Borders**: District counties outlined in blue with darker hover state
-- **Formatted Popups**: Display county name and formatted dollar amounts (e.g., "$10,516,000")
+### 🎨 **Modern Design & Interactivity**
+- **Professional UI**: Clean, card-based layout with Inter font and CSS custom properties
+- **Heat Map Coloring**: White ($0) to dark forest green ($10.5M) HSL gradient based on sales volume
+- **Smart Tooltips**: Pinch-zoom safe tooltips with click-to-pin functionality
+- **Hover Effects**: Smooth transitions with brightness adjustments and stroke changes
+- **Formatted Data**: Display county names and formatted dollar amounts (e.g., "$10,516,000")
 
 ### 📱 **Responsive Design**
-- **Mobile Optimization**: Collapsible header on screens ≤768px for better map visibility
-- **Touch-Friendly**: Clickable title with ▼/▲ toggle icon for mobile text expansion
-- **Desktop Full View**: Always displays complete content on larger screens
-- **Smooth Animations**: CSS transitions for expand/collapse actions
+- **Phone Optimized (≤600px)**: 3.0x zoom with centered positioning, collapsible description panel
+- **Tablet Support (700-1180px)**: 1.65-1.75x zoom with optimized aspect ratios for portrait/landscape
+- **Desktop View (≥1181px)**: 2-column layout with map and description side-by-side
+- **Touch-Friendly**: Pointer events support, tap-to-pin tooltips, smooth pinch-zoom
+- **Accessibility**: ARIA labels, keyboard navigation, and semantic HTML
 
 ### 📊 **Data Integration**
 - **2022 Soybean Sales**: US Census of Agriculture data
@@ -38,7 +40,7 @@ This project creates an interactive SVG-based heat map that visualizes soybean s
 
 ### **File Structure**
 ```
-├── kentucky-district6-embeddable.html    # Main interactive map (3.9MB)
+├── kentucky-district6-embeddable.html    # Main interactive map (46KB)
 ├── generate_district6_map.py             # Python generator script
 ├── kentucky-soybean-sales-2022.csv       # Full state sales data
 ├── district6-soybean-sales.csv           # District-specific data
@@ -53,14 +55,17 @@ This project creates an interactive SVG-based heat map that visualizes soybean s
 
 ### **Technologies Used**
 - **Python**: GeoPandas, ogr2ogr for GIS processing
-- **Frontend**: Pure HTML5, CSS3, vanilla JavaScript
-- **SVG Graphics**: 1000×500 viewBox, responsive scaling
+- **Frontend**: Pure HTML5, CSS3 (custom properties), vanilla JavaScript
+- **Typography**: Inter font family from Google Fonts
+- **SVG Graphics**: 800×400 viewBox with preserveAspectRatio="xMidYMid meet"
+- **Responsive Design**: CSS media queries with 3 breakpoints (600px, 700-1180px, 1181px+)
 - **Data Format**: US Census TIGER shapefiles → GeoJSON → SVG paths
 
 ### **Browser Compatibility**
-- Modern browsers supporting SVG, CSS Grid, and ES6 JavaScript
+- Modern browsers supporting SVG, CSS Grid, CSS Custom Properties, and ES6 JavaScript
 - Mobile-responsive design tested on iOS Safari and Android Chrome
-- Template literal string concatenation for cross-browser compatibility
+- Pointer Events API for unified mouse/touch interaction
+- MutationObserver for dynamic SVG loading
 
 ## 📈 District 6 Coverage
 
@@ -112,19 +117,23 @@ python3 generate_district6_map.py
 ## 🎯 Design Specifications
 
 ### **Color Scheme**
-- **Heat Map**: HSL gradient from white to dark green (120° hue, 60-90% saturation, 15-80% lightness)
-- **District Counties**: Royal blue borders (#4169E1)
-- **District Boundary**: Black solid line (2px)
-- **Non-District**: Light gray fill (#f5f5f5)
+- **Background**: Soft green-tinted gray (#f3f7f4)
+- **Card**: Pure white (#ffffff) with subtle shadow
+- **Heat Map**: HSL gradient from white to dark forest green (120° hue, 60-90% saturation, 15-80% lightness)
+- **County Borders**: Royal blue (#4169E1) with darker hover state (#1e40af)
+- **Accent Colors**: Deep green (#0f766e), bright green (#16a34a)
+- **Gradients**: Linear gradients for headers and panels
 
 ### **Typography**
-- **Primary Font**: Arial, sans-serif
-- **Header**: 1.5em (desktop), 1.2em (mobile)
-- **Attribution**: 0.75em, italicized
+- **Primary Font**: Inter (Google Fonts), with system fallbacks
+- **Header**: 1.25rem (desktop), 1.28rem (mobile)
+- **Body**: 0.95rem with line-height 1.5-1.6
+- **Weights**: 300 (light), 400 (regular), 600 (semi-bold), 700 (bold)
 
 ### **Responsive Breakpoints**
-- **Mobile**: ≤768px (collapsible header)
-- **Desktop**: >768px (full content display)
+- **Phone**: ≤600px (vertical layout, 3.0x zoom, collapsible description)
+- **Tablet**: 700-1180px (vertical layout, 1.65-1.75x zoom)
+- **Desktop**: ≥1181px (2-column layout, 2.0x zoom)
 
 ## 🚀 Development
 
